@@ -1,0 +1,29 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: attendance-service
+  profiles:
+    active: development
+  cloud:
+    config:
+      enabled: false
+
+  data:
+    mongodb:
+      uri: mongodb://admin:password_mongodb_123@mongo:27017/attendance_db?authSource=admin
+
+  kafka:
+    bootstrap-servers: kafka:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+        group-id: attendance-group
+        key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+        properties:
+          spring.json.trusted.packages: "*"
+jwt:
+  secret: ekxRWm04M3g3c0JOKFJaOXJZdjVEQHVGYkp2M0hzSzIjbk12RXlQdHFBKjVmQjlrWHBXOQ==
+  expiration: 3600000

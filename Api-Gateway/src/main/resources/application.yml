@@ -1,0 +1,43 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: attendance-service
+          uri: http://attendance-service:8082
+          predicates:
+            - Path=/attendance/**
+
+        - id: employee-service
+          uri: http://employee-service:8081
+          predicates:
+            - Path=/auth/**
+            - Path=/employee/**
+            - Path=/employee-attendance/**
+
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
+
+    # 선택: CORS 설정
+    globalcors:
+      corsConfigurations:
+        '[/**]':
+          allowedOrigins: "http://localhost:4200"
+          allowedMethods:
+            - GET
+            - POST
+            - PUT
+            - DELETE
+            - OPTIONS
+          allowedHeaders: "*"
+          allowCredentials: true
+
+eureka:
+  client:
+    register-with-eureka: false
+    fetch-registry: false

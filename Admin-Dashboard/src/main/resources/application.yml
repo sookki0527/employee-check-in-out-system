@@ -1,0 +1,31 @@
+server:
+  port: 8083
+spring:
+  application:
+    name: admin-dashboard
+  profiles:
+    active: development
+  cloud:
+    config:
+      enabled: false
+  autoconfigure:
+    exclude: org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration
+  datasource:
+    url: jdbc:mysql://mysql:3306/admin_db
+    username: root
+    password: passwordForMySQL8.1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+    jpa:
+      hibernate:
+        ddl-auto: update
+      show-sql: true
+      database-platform: org.hibernate.dialect.MySQLDialect
+  kafka:
+    bootstrap-servers: kafka:9092
+    consumer:
+      group-id: notification-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
