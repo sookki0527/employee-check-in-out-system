@@ -39,6 +39,7 @@ public class AuthService {
 
         Employee employee = employeeRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
         List<RoleDto> roles = employee.getRoles().stream().map(role -> new RoleDto(role.getName())).toList();
         if (!passwordEncoder.matches(password, employee.getPassword())) {
             throw new RuntimeException("Invalid username or password");
@@ -56,8 +57,11 @@ public class AuthService {
                 request.getIsAdmin() ? "ROLE_ADMIN" : "ROLE_EMPLOYEE"
         ).orElseThrow(() -> new RuntimeException("Role not found"));
         EmployeeRole employeeRole = new EmployeeRole(role.getName());
+
         Employee employee = new Employee(request.getUsername(), encodedPassword, List.of(employeeRole), request.getEmail());
+        employeeRole.setEmployee(employee);
         employeeRepository.save(employee);
+
     }
 
 }

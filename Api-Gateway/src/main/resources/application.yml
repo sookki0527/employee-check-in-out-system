@@ -6,38 +6,65 @@ spring:
     name: api-gateway
 
   cloud:
+    config:
+      enabled: false
+
+    security:
+        user:
+          name: user
+          password: password
+        basic:
+          enabled: false
     gateway:
+      globalcors:
+        add-to-simple-url-handler-mapping: true
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       routes:
         - id: attendance-service
           uri: http://attendance-service:8082
           predicates:
-            - Path=/attendance/**
+              - Path=/api/attendance/**
+          filters:
+            - RewritePath=/api/attendance/(?<segment>.*), /attendance/${segment}
 
-        - id: employee-service
+        - id: auth-route
           uri: http://employee-service:8081
           predicates:
-            - Path=/auth/**
-            - Path=/employee/**
-            - Path=/employee-attendance/**
-
+                  - Path=/api/auth/**
+          filters:
+            - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
+        - id: employee-route
+          uri: http://employee-service:8081
+          predicates:
+                  - Path=/api/employee/**
+          filters:
+          - RewritePath=/api/employee/(?<segment>.*), /employee/${segment}
+        - id: employee-attendance-route
+          uri: http://employee-service:8081
+          predicates:
+                  - Path=/api/employee-attendance/**
+          filters:
+            - RewritePath=/api/employee-attendance/(?<segment>.*), /employee-attendance/${segment}
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 
     # 선택: CORS 설정
-    globalcors:
-      corsConfigurations:
-        '[/**]':
-          allowedOrigins: "http://localhost:4200"
-          allowedMethods:
-            - GET
-            - POST
-            - PUT
-            - DELETE
-            - OPTIONS
-          allowedHeaders: "*"
-          allowCredentials: true
+
 
 eureka:
   client:
     register-with-eureka: false
     fetch-registry: false
+jwt:
+  secret: ekxRWm04M3g3c0JOKFJaOXJZdjVEQHVGYkp2M0hzSzIjbk12RXlQdHFBKjVmQjlrWHBXOQ==
+  expiration: 3600000

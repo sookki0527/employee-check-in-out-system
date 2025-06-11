@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.example.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -33,9 +34,17 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
         String path = request.getRequestURI();
+        String method = request.getMethod();
+        System.out.println("🔥 JwtRequestFilter called for path: " + path + " method: " + request.getMethod());
 
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
         // 🚫 "/auth/register", "/auth/login"은 필터 통과시킴
-        if (path.startsWith("/auth/register") || path.startsWith("/auth/login")) {
+        if (HttpMethod.OPTIONS.matches(method) ||
+                path.startsWith("/auth/register") ||
+                path.startsWith("/auth/login")) {
             filterChain.doFilter(request, response);
             return;
         }

@@ -6,7 +6,7 @@ import {AttendanceDto} from "../model/attendancedto.model";
   providedIn: 'root'
 })
 export class AdminService {
-  private authUrl = 'http://localhost:8082/attendance/attendance-list';
+  private authUrl = 'http://localhost:8080/api/attendance/attendance-list';
   constructor(private http: HttpClient) { }
 
   getAttendanceList(): Observable<any> {

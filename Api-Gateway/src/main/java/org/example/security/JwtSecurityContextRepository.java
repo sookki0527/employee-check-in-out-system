@@ -1,5 +1,7 @@
 package org.example.security;
 
+import org.example.util.JwtUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -11,9 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-@Component
+
 public class JwtSecurityContextRepository implements ServerSecurityContextRepository {
     private final ReactiveAuthenticationManager authenticationManager;
+
 
     public JwtSecurityContextRepository(ReactiveAuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;

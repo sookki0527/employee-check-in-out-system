@@ -1,9 +1,9 @@
 package org.example.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.dto.*;
 import org.example.entity.Attendance;
 import org.example.repository.AttendanceRepository;
-import org.example.security.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -22,19 +22,20 @@ public class AttendanceService {
 
     private final RestTemplate restTemplate;
     private final AttendanceRepository attendanceRepository;
-    String userServiceUrl = "http://employee-service:8081/employee";
-    private final JwtRequestFilter jwtRequestFilter;
+    private final HttpServletRequest request;
+    String userServiceUrl = "http://api-gateway:8080/api/employee";
+
     @Autowired
     private KafkaTemplate<String, NotificationRequest> kafkaTemplate;
     public AttendanceService(RestTemplate restTemplate,
                              AttendanceRepository attendanceRepository,
                              KafkaTemplate kafkaTemplate,
-                             JwtRequestFilter jwtRequestFilter) {
+                             HttpServletRequest request) {
 
         this.restTemplate = restTemplate;
         this.attendanceRepository = attendanceRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.jwtRequestFilter = jwtRequestFilter;
+        this.request = request;
     }
 
     @KafkaListener(topics = "attendance-topic", groupId = "attendance-group")
@@ -69,7 +70,8 @@ public class AttendanceService {
                 .map(Attendance::getUserId)
                 .distinct().toList();
        HttpHeaders headers = new HttpHeaders();
-       String jwtToken = JwtRequestFilter.getCurrentJwt();
+
+       String jwtToken = request.getHeader("Authorization");
        headers.set("Authorization", "Bearer " + jwtToken);
        headers.setContentType(MediaType.APPLICATION_JSON);
        HttpEntity<List<Long>> request = new HttpEntity<>(userIds, headers);

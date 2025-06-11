@@ -6,7 +6,7 @@ import {Observable} from "rxjs";
   providedIn: 'root'
 })
 export class AttendanceService {
-  private apiUrl = 'http://localhost:8081/employee-attendance';
+  private apiUrl = 'http://localhost:8080/api/employee-attendance';
   constructor(private http: HttpClient) {}
 
   checkIn(request: CheckInRequest): Observable<any> {

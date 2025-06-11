@@ -24,6 +24,7 @@ public class JwtUtil {
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        System.out.println("✅ JwtUtil 초기화 완료");
     }
 
     public boolean validateToken(String token) {
