@@ -10,11 +10,16 @@ export class AttendanceService {
   constructor(private http: HttpClient) {}
 
   checkIn(request: CheckInRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/check-in`, request);
+    return this.http.post(`${this.apiUrl}/check-in`, request,{
+      withCredentials: true
+    });
   }
 
   checkOut(request: CheckInRequest): Observable<any> {
-    return this.http.post(`${this.apiUrl}/check-out`, request);
+    return this.http.post(`${this.apiUrl}/check-out`, request,
+      {
+        withCredentials: true
+      });
   }
 
 }

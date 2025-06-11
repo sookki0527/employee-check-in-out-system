@@ -12,6 +12,11 @@ import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.reactive.CorsConfigurationSource;
+import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
+
+import java.util.List;
 
 
 @EnableWebFluxSecurity
@@ -32,14 +37,16 @@ public class GatewaySecurityConfig {
         return new JwtSecurityContextRepository(manager);
     }
 
-
-
     @Bean
     public SecurityWebFilterChain filterChain(ServerHttpSecurity http, JwtUtil jwtUtil) {
         return http
+                .cors(cors -> {})
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll() // ✅ preflight 허용
+//                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+//                        .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/employee/**").authenticated()
@@ -49,13 +56,10 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/api/attendance/**").authenticated()
                         .anyExchange().authenticated()
                 )
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authenticationManager(jwtAuthenticationManager(jwtUtil))
                 .securityContextRepository(jwtSecurityContextRepository(jwtAuthenticationManager(jwtUtil)))
                 .build();
     }
-
 
     @Bean
     public PasswordEncoder passwordEncoder() {

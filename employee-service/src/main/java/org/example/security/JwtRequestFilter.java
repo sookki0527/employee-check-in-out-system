@@ -33,24 +33,27 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
+
         String path = request.getRequestURI();
         String method = request.getMethod();
-        System.out.println("🔥 JwtRequestFilter called for path: " + path + " method: " + request.getMethod());
+        System.out.println("🔥 JwtRequestFilter called for path: " + path + " method: " + method);
 
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        // ✅ 1. OPTIONS 요청은 바로 통과
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            System.out.println("✅ Preflight request allowed");
             response.setStatus(HttpServletResponse.SC_OK);
-            return;
+            return; // ❗주의: 여기서 filterChain.doFilter() 호출 안 함
         }
-        // 🚫 "/auth/register", "/auth/login"은 필터 통과시킴
-        if (HttpMethod.OPTIONS.matches(method) ||
-                path.startsWith("/auth/register") ||
-                path.startsWith("/auth/login")) {
+
+        // ✅ 2. 로그인/회원가입 요청은 필터 건너뜀
+        if (path.startsWith("/auth/register") || path.startsWith("/auth/login")) {
+            System.out.println("✅ register and login filter skipped");
             filterChain.doFilter(request, response);
             return;
         }
 
+        // ✅ 3. 토큰 검사
         String authHeader = request.getHeader("Authorization");
-
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
             String token = authHeader.substring(7);
 
@@ -66,4 +69,5 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
+
 }

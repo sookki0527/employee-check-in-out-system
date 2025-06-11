@@ -17,7 +17,6 @@ spring:
           enabled: false
     gateway:
       globalcors:
-        add-to-simple-url-handler-mapping: true
         corsConfigurations:
           '[/**]':
             allowedOrigins: "http://localhost:4200"
@@ -34,6 +33,7 @@ spring:
           uri: http://attendance-service:8082
           predicates:
               - Path=/api/attendance/**
+              - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/attendance/(?<segment>.*), /attendance/${segment}
 
@@ -41,18 +41,21 @@ spring:
           uri: http://employee-service:8081
           predicates:
                   - Path=/api/auth/**
+                  - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
         - id: employee-route
           uri: http://employee-service:8081
           predicates:
                   - Path=/api/employee/**
+                  - Method=OPTIONS,GET,POST
           filters:
           - RewritePath=/api/employee/(?<segment>.*), /employee/${segment}
         - id: employee-attendance-route
           uri: http://employee-service:8081
           predicates:
                   - Path=/api/employee-attendance/**
+                  - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/employee-attendance/(?<segment>.*), /employee-attendance/${segment}
       default-filters:

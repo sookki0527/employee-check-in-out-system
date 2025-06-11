@@ -41,6 +41,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
          http
+                 //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                  .httpBasic(httpBasic -> httpBasic.disable())   // ✅ 꼭 필요
                  .formLogin(form -> form.disable())             // ✅ 꼭 필요
@@ -54,9 +55,19 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                  .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
-
-
             return http.build();
+    }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:4200"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedHeaders(List.of("*")); // or ["Authorization", "Content-Type"]
+        config.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
 
