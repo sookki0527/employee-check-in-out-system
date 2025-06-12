@@ -1,5 +1,10 @@
 package org.example.filter;
 
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.example.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
@@ -11,12 +16,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.io.IOException;
+
 @Component
-public class JwtAuthFilter implements GlobalFilter, Ordered {
+public class JwtAuthFilter implements OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
 
@@ -24,51 +33,37 @@ public class JwtAuthFilter implements GlobalFilter, Ordered {
         this.jwtUtil = jwtUtil;
     }
 
+
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+    protected void doFilterInternal(
+            @NonNull HttpServletRequest request,
+            @NonNull HttpServletResponse response,
+            @NonNull FilterChain filterChain) throws ServletException, IOException {
+        String authHeader = request.getHeader("Authorization");
+        final String token;
+        String username;
 
-
-        HttpMethod method = exchange.getRequest().getMethod();
-        String path = exchange.getRequest().getURI().getPath();
-        if (HttpMethod.OPTIONS.equals(method)) {
-            return chain.filter(exchange);
+        if (authHeader == null || !authHeader.startsWith("Bearer")) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        ServerHttpRequest request = exchange.getRequest();
-        System.out.println("🔥 [JwtAuthFilter] Incoming request: " + method + " " + path);
-        throw new RuntimeException("🔥 필터 실행 확인용 에러");
-//        if (!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)) {
-//            return onError(exchange, "Missing Authorization Header", HttpStatus.UNAUTHORIZED);
-//        }
-//
-//        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-//        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-//            return onError(exchange, "Invalid Authorization Header", HttpStatus.UNAUTHORIZED);
-//        }
-//
-//        String token = authHeader.substring(7);
-//        if (!jwtUtil.validateToken(token)) {
-//            return onError(exchange, "Invalid JWT Token", HttpStatus.UNAUTHORIZED);
-//        }
-//
-//        // Optional: 사용자 정보 Header로 추가
-//        String username = jwtUtil.extractUsername(token);
-//        ServerHttpRequest mutatedRequest = request.mutate()
-//                .header("X-User-Name", username)
-//                .build();
-//
-//        return chain.filter(exchange.mutate().request(mutatedRequest).build());
+        token = authHeader.substring(7);
+        username = jwtUtil.extractUsername(token);
+
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
+            if (jwtUtil.validateToken(token)) {
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities());
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authToken);
+            }
+        }
+
+        filterChain.doFilter(request, response);
     }
 
-    private Mono<Void> onError(ServerWebExchange exchange, String err, HttpStatus httpStatus) {
-        exchange.getResponse().setStatusCode(httpStatus);
-        return exchange.getResponse().setComplete();
-    }
-
-    @Override
-    public int getOrder() {
-        return -1; // 우선순위 높게
-    }
 //    @Override
 //    public GatewayFilter apply(Config config) {
 //
