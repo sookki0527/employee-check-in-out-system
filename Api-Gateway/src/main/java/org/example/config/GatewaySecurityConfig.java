@@ -51,7 +51,7 @@ public class GatewaySecurityConfig {
                         .pathMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/employee/**").authenticated()
                         .pathMatchers(HttpMethod.GET, "/api/employee/**").authenticated()
-                        .pathMatchers(HttpMethod.POST, "/api/employee-attendance/**").authenticated()
+                        .pathMatchers(HttpMethod.POST, "/api/employee-attendance/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/attendance/**").authenticated()
                         .pathMatchers(HttpMethod.GET, "/api/attendance/**").authenticated()
                         .anyExchange().authenticated()

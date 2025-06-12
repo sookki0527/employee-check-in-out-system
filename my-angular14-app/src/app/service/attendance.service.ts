@@ -14,7 +14,7 @@ export class AttendanceService {
     const token = localStorage.getItem('token') || '';
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`  // 🔁 실제 토큰이면 여기에 삽입
+      'Authorization': `Bearer ${token}`
     });
 
     return this.http.post(`${this.apiUrl}/check-in`, request, {

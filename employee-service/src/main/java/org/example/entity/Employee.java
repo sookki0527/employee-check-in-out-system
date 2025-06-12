@@ -26,7 +26,7 @@ public class Employee {
     @Column(unique = true)
     private String password;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<EmployeeRole> roles;
 
     @Column(unique = true)
