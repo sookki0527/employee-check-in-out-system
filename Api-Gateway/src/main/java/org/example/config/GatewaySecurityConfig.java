@@ -14,9 +14,9 @@ public class GatewaySecurityConfig {
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(exchange -> exchange
-                        .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
-                        .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
-                        .pathMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers("/api/**").permitAll()
+                        .pathMatchers( "/api/auth/**").permitAll()
                         .anyExchange().authenticated()
                 )
                 .build();  // ✅ 여기까지만 설정하면 충분함

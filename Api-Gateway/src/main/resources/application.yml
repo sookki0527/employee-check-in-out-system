@@ -26,7 +26,9 @@ spring:
               - PUT
               - DELETE
               - OPTIONS
-            allowedHeaders: "*"
+            allowedHeaders:
+              - Authorization
+              - Content-Type
             allowCredentials: true
       routes:
         - id: attendance-service
@@ -36,7 +38,6 @@ spring:
               - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/attendance/(?<segment>.*), /attendance/${segment}
-            - JwtAuthFilter
 
         - id: auth-route
           uri: http://employee-service:8081
@@ -45,7 +46,6 @@ spring:
                   - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/auth/(?<segment>.*), /auth/${segment}
-            - JwtAuthFilter
         - id: employee-route
           uri: http://employee-service:8081
           predicates:
@@ -53,7 +53,7 @@ spring:
                   - Method=OPTIONS,GET,POST
           filters:
           - RewritePath=/api/employee/(?<segment>.*), /employee/${segment}
-          - JwtAuthFilter
+
         - id: employee-attendance-route
           uri: http://employee-service:8081
           predicates:
@@ -61,7 +61,7 @@ spring:
                   - Method=OPTIONS,GET,POST
           filters:
             - RewritePath=/api/employee-attendance/(?<segment>.*), /employee-attendance/${segment}
-            - JwtAuthFilter
+
       default-filters:
         - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Credentials
 
