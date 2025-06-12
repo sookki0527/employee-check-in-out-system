@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -22,19 +23,27 @@ public class CorsResponseHeaderFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
-        System.out.println("🔥 preflight is gateway");
+        System.out.println(" preflight is gateway");
         ServerHttpRequest request = exchange.getRequest();
         ServerHttpResponse response = exchange.getResponse();
 
         log.info("🔥 CorsResponseHeaderFilter triggered for {}", request.getURI());
-        response.getHeaders().add("Access-Control-Allow-Origin", "http://localhost:4200");
-        response.getHeaders().add("Access-Control-Allow-Credentials", "true");
-        response.getHeaders().add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.getHeaders().add("Access-Control-Allow-Headers", "*");
+        System.out.println(" 🔥 api gateway cors method " + request.getMethod());
+        HttpHeaders headers = response.getHeaders();
+        if (!headers.containsKey("Access-Control-Allow-Origin")) {
+            headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
+            headers.add("Access-Control-Allow-Credentials", "true");
+            headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+            headers.add("Access-Control-Allow-Headers", "*");
+        }
 
 
         if (request.getMethod() == HttpMethod.OPTIONS) {
             System.out.println("🔥 preflight CORS handled at gateway");
+//            headers.add("Access-Control-Allow-Origin", "http://localhost:4200");
+//            headers.add("Access-Control-Allow-Credentials", "true");
+//            headers.add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+//            headers.add("Access-Control-Allow-Headers", "*");
             response.setStatusCode(HttpStatus.OK);
             return response.setComplete();
         }

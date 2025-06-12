@@ -14,6 +14,10 @@ export class AuthService {
 
   register(data: { username: string; password: string; email: string; isAdmin?: boolean }): Observable<any> {
     return this.http.post('http://localhost:8080/api/auth/register', data, {
+      headers: {
+        'Content-Type': 'application/json',      // <- 기본값
+        'Authorization': 'Bearer token'          // <- 커스텀 헤더
+      },
       withCredentials: true
     });
   }

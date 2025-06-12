@@ -45,8 +45,8 @@ public class GatewaySecurityConfig {
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
                 .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .authorizeExchange(exchange -> exchange
-//                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-//                        .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/employee/**").authenticated()

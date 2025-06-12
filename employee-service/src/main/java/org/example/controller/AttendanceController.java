@@ -20,6 +20,8 @@ public class AttendanceController {
     }
     @PostMapping("/check-in")
     public ResponseEntity<Map<String, String>> checkIn(@RequestBody CheckInRequest checkInRequest) {
+
+
         checkInService.recordCheckIn(checkInRequest);
         Map<String, String> response = new HashMap<>();
         response.put("message", "Employee signed in successfully");

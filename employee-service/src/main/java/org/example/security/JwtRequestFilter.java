@@ -33,7 +33,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain)
             throws ServletException, IOException {
-
+        System.out.println("🛠️ [EmployeeService] Request received: " + request.getRequestURI());
         String path = request.getRequestURI();
         String method = request.getMethod();
         System.out.println("🔥 JwtRequestFilter called for path: " + path + " method: " + method);
