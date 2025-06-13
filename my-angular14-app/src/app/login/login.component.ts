@@ -12,6 +12,7 @@ export class LoginComponent implements OnInit {
 
   constructor(private fb: FormBuilder, private authService: AuthService, private router: Router) {}
   loginForm!: FormGroup;
+  role = localStorage.getItem('role');
   ngOnInit(): void {
     this.loginForm = this.fb.group({
       username: ['', Validators.required],
@@ -22,7 +23,12 @@ export class LoginComponent implements OnInit {
     if (this.loginForm.valid) {
       this.authService.login(this.loginForm.value).subscribe(token => {
         localStorage.setItem('jwt', token);
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(
+          this.role === 'ROLE_EMPLOYEE'
+            ? ['/dashboard']
+            : ['/admin-dashboard']
+        );
+
       });
     }
   }

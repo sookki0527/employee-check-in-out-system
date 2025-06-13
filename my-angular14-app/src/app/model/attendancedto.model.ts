@@ -1,4 +1,5 @@
 export interface AttendanceDto{
   username: string;
-  checkIn: boolean
+  checkIn: string;
+  time: string;
 }

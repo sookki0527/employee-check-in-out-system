@@ -1,7 +1,6 @@
 package org.example.util;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -24,6 +23,7 @@ public class JwtUtil {
     @PostConstruct
     public void init() {
         this.key = Keys.hmacShaKeyFor(Decoders.BASE64.decode(secret));
+        System.out.println("✅ JwtUtil 초기화 완료");
     }
 
     public boolean validateToken(String token) {
@@ -33,9 +33,18 @@ public class JwtUtil {
                     .build()
                     .parseClaimsJws(token);
             return true;
-        } catch (Exception e) {
-            return false;
+        }catch (ExpiredJwtException e) {
+            System.out.println("❌ Token expired: " + e.getMessage());
+        } catch (UnsupportedJwtException e) {
+            System.out.println("❌ Unsupported token: " + e.getMessage());
+        } catch (MalformedJwtException e) {
+            System.out.println("❌ Malformed token: " + e.getMessage());
+        } catch (SignatureException e) {
+            System.out.println("❌ Invalid signature: " + e.getMessage());
+        } catch (IllegalArgumentException e) {
+            System.out.println("❌ Illegal argument: " + e.getMessage());
         }
+        return false;
     }
 
     public String extractUsername(String token) {

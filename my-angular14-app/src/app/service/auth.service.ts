@@ -7,20 +7,28 @@ import { tap } from 'rxjs/operators';
   providedIn: 'root'
 })
 export class AuthService {
-  private authUrl = 'http://localhost:8081/auth'; // 백엔드 인증 API
+  private authUrl = 'http://localhost:8080/api/auth'; // 백엔드 인증 API
   private isAuthenticated$ = new BehaviorSubject<boolean>(false);
 
   constructor(private http: HttpClient) {}
 
   register(data: { username: string; password: string; email: string; isAdmin?: boolean }): Observable<any> {
-    return this.http.post(`${this.authUrl}/register`, data);
+    return this.http.post('http://localhost:8080/api/auth/register', data, {
+      headers: {
+        'Content-Type': 'application/json',      // <- 기본값
+      },
+      withCredentials: true
+    });
   }
 
   login(credentials: { username: string; password: string }): Observable<any> {
     return this.http.post(`${this.authUrl}/login`, credentials).pipe(
       tap((response: any) => {
         localStorage.setItem('token', response.token);
-        localStorage.setItem('userId', response.id);
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('userId', response.userId);
+        localStorage.setItem('role', response.role);
+        console.log(response.role);
         this.isAuthenticated$.next(true);
       })
     );

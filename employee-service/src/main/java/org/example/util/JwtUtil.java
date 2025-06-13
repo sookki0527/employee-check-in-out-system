@@ -3,6 +3,7 @@ package org.example.util;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.example.config.JwtConfig;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -17,20 +18,16 @@ public class JwtUtil {
 
     private Key key;
 
-    // 토큰 유효시간 (예: 1시간)
-    private final long expirationMs = 1000 * 60 * 60;
-
-    @PostConstruct
-    public void init() {
-        this.key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    public JwtUtil(JwtConfig config) {
+        this.key = config.getKey();
     }
+
 
     // ✅ 토큰 생성
     public String generateToken(String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }

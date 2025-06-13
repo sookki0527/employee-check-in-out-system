@@ -6,6 +6,6 @@ import java.time.LocalDateTime;
 @Data
 public class CheckInRequest {
     private Long userId;
-    private LocalDateTime timestamp;
+    private String timestamp;
     private String type;
 }

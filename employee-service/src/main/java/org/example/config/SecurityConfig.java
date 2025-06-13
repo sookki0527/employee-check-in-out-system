@@ -41,32 +41,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
          http
-                 .cors(cors -> {})
                 .csrf(csrf -> csrf.disable())
+                 .httpBasic(httpBasic -> httpBasic.disable())   // ✅ 꼭 필요
+                 .formLogin(form -> form.disable())             // ✅ 꼭 필요
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/employee-attendance/check-in").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/employee-attendance/check-out").permitAll()
                         .anyRequest().authenticated()
                 )
                  .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
-
-
             return http.build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:4200"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

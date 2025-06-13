@@ -1,9 +1,9 @@
 package org.example.service;
 
+import jakarta.servlet.http.HttpServletRequest;
 import org.example.dto.*;
 import org.example.entity.Attendance;
 import org.example.repository.AttendanceRepository;
-import org.example.security.JwtRequestFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
@@ -13,85 +13,94 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class AttendanceService {
 
     private final RestTemplate restTemplate;
     private final AttendanceRepository attendanceRepository;
+    private final HttpServletRequest request;
     String userServiceUrl = "http://employee-service:8081/employee";
-    private final JwtRequestFilter jwtRequestFilter;
+
     @Autowired
     private KafkaTemplate<String, NotificationRequest> kafkaTemplate;
     public AttendanceService(RestTemplate restTemplate,
                              AttendanceRepository attendanceRepository,
                              KafkaTemplate kafkaTemplate,
-                             JwtRequestFilter jwtRequestFilter) {
+                             HttpServletRequest request) {
 
         this.restTemplate = restTemplate;
         this.attendanceRepository = attendanceRepository;
         this.kafkaTemplate = kafkaTemplate;
-        this.jwtRequestFilter = jwtRequestFilter;
+        this.request = request;
     }
 
     @KafkaListener(topics = "attendance-topic", groupId = "attendance-group")
-    public void listen(CheckInRequest event){
-
-        Long userId = event.getUserId();
+    public void listen(NotifyRequest event){
 
         NotificationResponse notif = new NotificationResponse(
-            "Employee " + event.getUserId() + " "+ event.getType(), LocalDateTime.now().toString()
+            "Employee " + event.getUsername() + " "+ event.getType(), LocalDateTime.now().toString()
         );
 
         System.out.println("✅ Consumed Kafka message: " + notif);
-        saveCheckIn(userId);
-    }
-
-
-    public void saveCheckIn(Long userId){
-        Attendance attendance = Attendance.builder()
-                .userId(userId).checkIn(true).build();
+        Attendance attendance = new Attendance(event.getUsername(), event.getType(), event.getTime());
         attendanceRepository.save(attendance);
-    }
 
+    }
 
     public void notifyCheckIn(NotificationRequest notificationRequest) {
         kafkaTemplate.send("notification-topic", notificationRequest);
     }
 
-   public List<AttendanceDto> getAttendanceList(){
+    public List<AttendanceDto> getAttendances(){
         List<Attendance> attendanceList = attendanceRepository.findAll();
-        List<AttendanceDto> attendanceDtos = new ArrayList<>();
-        List<Long> userIds = attendanceList.stream()
-                .map(Attendance::getUserId)
-                .distinct().toList();
-       HttpHeaders headers = new HttpHeaders();
-       String jwtToken = JwtRequestFilter.getCurrentJwt();
-       headers.set("Authorization", "Bearer " + jwtToken);
-       headers.setContentType(MediaType.APPLICATION_JSON);
-       HttpEntity<List<Long>> request = new HttpEntity<>(userIds, headers);
-       ResponseEntity<Map<Long, EmployeeDto>> response =
-               restTemplate.exchange(
-                       userServiceUrl + "/batch",
-                       HttpMethod.POST,
-                       request,
-                       new ParameterizedTypeReference<>() {}
+        System.out.println("✅ attendance list size: " + attendanceList.size());
+        List<AttendanceDto> attendanceDtoList = new ArrayList<>();
+        for (Attendance attendance : attendanceList) {
+            AttendanceDto attendanceDto = new AttendanceDto();
+            attendanceDto.setUsername(attendance.getUsername());
+            attendanceDto.setCheckIn(attendance.getCheckIn());
+            attendanceDto.setTime(attendance.getTime());
+            System.out.println("✅ attendance : " + attendanceDto.getUsername() + " " + attendanceDto.getCheckIn());
+            attendanceDtoList.add(attendanceDto);
+        }
+        return attendanceDtoList;
+    }
 
-       );
-
-       Map<Long, EmployeeDto> employeeMap = response.getBody();
-       for (Attendance attendance : attendanceList) {
-           AttendanceDto dto = new AttendanceDto();
-           EmployeeDto emp = employeeMap.get(attendance.getUserId());
-           dto.setUsername(emp != null ? emp.getUsername() : "Unknown");
-           dto.setCheckIn(attendance.isCheckIn());
-           attendanceDtos.add(dto);
-       }
-        return attendanceDtos;
-   }
+//   public Set<AttendanceDto> getAttendanceList(){
+//        List<Attendance> attendanceList = attendanceRepository.findAll();
+//        Set<AttendanceDto> attendanceDtos = new HashSet<>();
+//        List<Long> userIds = attendanceList.stream()
+//                .map(Attendance::getUsername)
+//                .distinct().toList();
+//       HttpHeaders headers = new HttpHeaders();
+//
+//       String jwtToken = request.getHeader("Authorization");
+//       System.out.println("🔥 Sent userIds: " + userIds);
+//       System.out.println("🔥 Authorization Header: " + jwtToken);
+//       headers.set("Authorization", jwtToken);
+//       headers.setContentType(MediaType.APPLICATION_JSON);
+//       HttpEntity<List<Long>> request = new HttpEntity<>(userIds, headers);
+//       ResponseEntity<Map<Long, EmployeeDto>> response =
+//               restTemplate.exchange(
+//                       userServiceUrl + "/batch",
+//                       HttpMethod.POST,
+//                       request,
+//                       new ParameterizedTypeReference<>() {}
+//
+//       );
+//
+//       Map<Long, EmployeeDto> employeeMap = response.getBody();
+//       for (Attendance attendance : attendanceList) {
+//           AttendanceDto dto = new AttendanceDto();
+//           EmployeeDto emp = employeeMap.get(attendance.getUserId());
+//           dto.setUsername(emp != null ? emp.getUsername() : "Unknown");
+//           dto.setCheckIn(attendance.getCheckIn());
+//           attendanceDtos.add(dto);
+//       }
+//        return attendanceDtos;
+//   }
 
 }
 

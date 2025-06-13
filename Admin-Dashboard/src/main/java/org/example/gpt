@@ -1,0 +1,105 @@
+********************** gateway service  ***********************
+
+    gateway:
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+
+      @Bean
+        public SecurityWebFilterChain filterChain(ServerHttpSecurity http, JwtUtil jwtUtil) {
+            return http
+                    .cors(cors -> {})
+                    .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                    .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                    .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                    .authorizeExchange(exchange -> exchange
+                            .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                            .pathMatchers(HttpMethod.OPTIONS, "/api/**").permitAll()
+                            .pathMatchers(HttpMethod.POST, "/api/auth/**").permitAll()
+                            .pathMatchers(HttpMethod.GET, "/api/auth/**").permitAll()
+                            .pathMatchers(HttpMethod.POST, "/api/employee/**").authenticated()
+                            .pathMatchers(HttpMethod.GET, "/api/employee/**").authenticated()
+                            .pathMatchers(HttpMethod.POST, "/api/employee-attendance/**").authenticated()
+                            .pathMatchers(HttpMethod.POST, "/api/attendance/**").authenticated()
+                            .pathMatchers(HttpMethod.GET, "/api/attendance/**").authenticated()
+                            .anyExchange().authenticated()
+                    )
+                    .authenticationManager(jwtAuthenticationManager(jwtUtil))
+                    .securityContextRepository(jwtSecurityContextRepository(jwtAuthenticationManager(jwtUtil)))
+                    .build();
+        }
+**************************************************************************
+
+*************************** employee-service *******************************
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String path = request.getRequestURI();
+        String method = request.getMethod();
+        System.out.println("🔥 JwtRequestFilter called for path: " + path + " method: " + method);
+
+        // ✅ 1. OPTIONS 요청은 바로 통과
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            System.out.println("✅ Preflight request allowed");
+            response.setStatus(HttpServletResponse.SC_OK);
+            return; // ❗주의: 여기서 filterChain.doFilter() 호출 안 함
+        }
+
+        // ✅ 2. 로그인/회원가입 요청은 필터 건너뜀
+        if (path.startsWith("/auth/register") || path.startsWith("/auth/login")) {
+            System.out.println("✅ register and login filter skipped");
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        // ✅ 3. 토큰 검사
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+
+            if (jwtUtil.validateToken(token)) {
+                String username = jwtUtil.getUsername(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                        userDetails, "", userDetails.getAuthorities()
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
+
+}
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+         http
+                .csrf(csrf -> csrf.disable())
+                 .httpBasic(httpBasic -> httpBasic.disable())   // ✅ 꼭 필요
+                 .formLogin(form -> form.disable())             // ✅ 꼭 필요
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/employee-attendance/check-in").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/employee-attendance/check-out").permitAll()
+                        .anyRequest().authenticated()
+                )
+                 .addFilterBefore(jwtRequestFilter(), UsernamePasswordAuthenticationFilter.class);
+            return http.build();
+    }
+***************************************

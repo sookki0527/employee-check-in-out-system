@@ -28,6 +28,7 @@ public class EmployeeController {
     @PostMapping("/batch")
     public Map<Long, EmployeeDto> getEmployeesByIds(@RequestBody List<Long> userIds) {
         return employeeService.getEmployeesByIds(userIds);
+
     }
 }
 

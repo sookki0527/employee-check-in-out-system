@@ -26,10 +26,11 @@ services:
     networks:
       - backend
     healthcheck:
-      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-ppasswordForMySQL8.1" ]
       interval: 10s
       timeout: 5s
       retries: 5
+
   mongo:
     image: mongo:6.0
     container_name: mongo
