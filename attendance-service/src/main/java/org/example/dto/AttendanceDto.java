@@ -5,5 +5,6 @@ import lombok.Data;
 @Data
 public class AttendanceDto {
     private String username;
-    private boolean checkIn;
+    private String checkIn;
+    private String time;
 }

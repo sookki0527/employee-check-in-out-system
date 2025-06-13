@@ -33,6 +33,7 @@ public class EmployeeService {
 
         return new EmployeeDto(employee.getUsername(), roles);
     }
+
     public EmployeeDto getEmployeeByName(String username){
         Employee employee = employeeRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
@@ -45,17 +46,27 @@ public class EmployeeService {
                .stream()
                .map(Employee::getId)
                .toList();
-
     }
 
     public Map<Long, EmployeeDto> getEmployeesByIds(List<Long> userIds) {
-        List<Employee> employees = employeeRepository.findAllById(userIds);
+        try {
+            List<Employee> employees = employeeRepository.findAllById(userIds);
 
-        return employees.stream()
-                .collect(Collectors.toMap(
-                        Employee::getId,
-                        emp -> new EmployeeDto(emp.getUsername())
-            ));
+            if (employees == null || employees.isEmpty()) {
+                throw new RuntimeException("❌ No employees found for given IDs");
+            }
+
+            return employees.stream()
+                    .filter(emp -> emp.getId() != null && emp.getUsername() != null)
+                    .collect(Collectors.toMap(
+                            Employee::getId,
+                            emp -> new EmployeeDto(emp.getUsername()),
+                            (e1, e2) -> e1 // 충돌 시 기존 값 유지
+                    ));
+        } catch (Exception e) {
+            System.out.println("❌ Error in getEmployeesByIds: " + e.getMessage());
+            throw new RuntimeException("Failed to fetch employee data", e);
+        }
     }
 
 }

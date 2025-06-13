@@ -25,7 +25,10 @@ export class AuthService {
     return this.http.post(`${this.authUrl}/login`, credentials).pipe(
       tap((response: any) => {
         localStorage.setItem('token', response.token);
-        localStorage.setItem('userId', response.id);
+        localStorage.setItem('username', response.username);
+        localStorage.setItem('userId', response.userId);
+        localStorage.setItem('role', response.role);
+        console.log(response.role);
         this.isAuthenticated$.next(true);
       })
     );

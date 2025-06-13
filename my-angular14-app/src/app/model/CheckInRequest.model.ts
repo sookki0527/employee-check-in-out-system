@@ -1,6 +1,6 @@
 export interface CheckInRequest{
 
   userId: number;
-  timestamp: Date;
+  timestamp: string;
   type: string;
 }

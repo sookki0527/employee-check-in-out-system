@@ -26,6 +26,6 @@ public class GatewaySecurityConfig {
                         .anyExchange().authenticated()
                 )
 
-                .build();  // ✅ 여기까지만 설정하면 충분함
+                .build();
     }
 }

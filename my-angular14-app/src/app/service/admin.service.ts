@@ -7,7 +7,7 @@ import {HttpHeaders} from "@angular/common/http"
   providedIn: 'root'
 })
 export class AdminService {
-  private authUrl = 'http://localhost:8080/api/attendance/attendance-list';
+  private adminUrl = 'http://localhost:8080/api/attendance/attendance-list';
   constructor(private http: HttpClient) { }
 
   getAttendanceList(): Observable<any> {
@@ -17,7 +17,7 @@ export class AdminService {
       'Authorization': `Bearer ${token}`
     });
 
-    return this.http.get<AttendanceDto[]>(this.authUrl, {
+    return this.http.get<AttendanceDto[]>(this.adminUrl, {
       headers: headers,
       withCredentials: true
     });

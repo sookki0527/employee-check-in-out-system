@@ -7,6 +7,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,7 +18,13 @@ public class Attendance {
     @Id
     private String id;
 
-    private Long userId;
-    private boolean checkIn;
+    private String username;
+    private String checkIn;
+    private String time;
 
+    public Attendance(String username, String type, String timestamp) {
+        this.username = username;
+        this.checkIn = type;
+        this.time = timestamp;
+    }
 }

@@ -45,8 +45,10 @@ public class AuthController {
         EmployeeDto employeeDto = employeeService.getEmployeeByName(request.getUsername());
         Map<String, String> body = new HashMap<>();
         body.put("token", token);
+        body.put("username", request.getUsername());
         body.put("userId", employeeDto.getId().toString());
-        body.put("roles", employeeDto.getRoles().toString());
+        body.put("role", employeeDto.getRoles().get(0).getRoleName().toString());
+        System.out.println("🔥 role when login" + employeeDto.getRoles().get(0).getRoleName().toString());
         return ResponseEntity.ok(body);
     }
 
