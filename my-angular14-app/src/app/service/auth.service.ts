@@ -16,7 +16,6 @@ export class AuthService {
     return this.http.post('http://localhost:8080/api/auth/register', data, {
       headers: {
         'Content-Type': 'application/json',      // <- 기본값
-        'Authorization': 'Bearer token'          // <- 커스텀 헤더
       },
       withCredentials: true
     });
