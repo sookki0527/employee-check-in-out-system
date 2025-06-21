@@ -4,7 +4,7 @@ A full-stack microservices application that manages employee check-ins and check
 
 ---
 
-## 🧱 Architecture Overview
+##  Architecture Overview
 
 ![Diagram_employee](https://github.com/user-attachments/assets/d2ba3d69-b3bd-4cdc-b2d6-dd44ffa8e0eb)
 
@@ -18,7 +18,7 @@ A full-stack microservices application that manages employee check-ins and check
 
 ---
 
-## 🛠 Tech Stack
+##  Tech Stack
 
 | Component          | Technology                                |
 |--------------------|--------------------------------------------|
@@ -31,58 +31,58 @@ A full-stack microservices application that manages employee check-ins and check
 
 ---
 
-## ✨ Features
+##  Features
 
-- 🔐 Secure login and role-based access with JWT
-- 🚪 Real-time employee check-in/out with timestamped logs
-- 🔄 Kafka-based decoupled architecture for asynchronous processing
-- 🔒 API gateway (Spring Cloud Gateway) enforcing centralized security
-- 🧱 Modular microservices for clear domain separation
-- 🐳 Fully containerized for easy deployment
+-  Secure login and role-based access with JWT
+-  Real-time employee check-in/out with timestamped logs
+-  Kafka-based decoupled architecture for asynchronous processing
+-  API gateway (Spring Cloud Gateway) enforcing centralized security
+-  Modular microservices for clear domain separation
+-  Fully containerized for easy deployment
 
 ---
 
-## 📂 System Structure
+##  System Structure
 
-### 🌐 Spring Cloud Gateway
+###  Spring Cloud Gateway
 - Acts as the single entry point for all backend services
 - Validates JWT tokens
 - Routes requests to appropriate microservices
 
-### 🔐 JWT Authentication
+###  JWT Authentication
 - Stateless auth via signed JWT tokens
 - Roles and access rights encoded in token payload
 - Auth headers validated by Gateway before request forwarding
 
-### 📬 Kafka
+###  Kafka
 - Used as async message bus between services
 - Example: check-in events published from Attendance Service to be logged/stored
 
-### 🧩 Microservices
+###  Microservices
 
-#### ✅ **Attendance Service**
+####  **Attendance Service**
 - Exposes APIs for `/checkin`, `/checkout`
 - Timestamps each event and publishes to Kafka
 - Stores activity in MySQL
 
-#### 👤 **Employee Service**
+####  **Employee Service**
 - Handles employee creation, login, and role assignment
 - Issues JWT tokens on successful login
 
-#### 📊 **Admin Dashboard**
+####  **Admin Dashboard**
 - Provides employee attendance history
 - Aggregates event streams for UI
 
 ---
 
-## 🛢️ Persistence Layer
+##  Persistence Layer
 
 - **MySQL**: Stores employee profiles and check-in/out history
 - **MongoDB**: Stores logs, event payloads, and audit trails
 
 ---
 
-## 🐳 Containerization
+##  Containerization
 
 - Entire system orchestrated using Docker Compose
 - Each service defined as its own container (frontend, backend, Kafka, DBs)
